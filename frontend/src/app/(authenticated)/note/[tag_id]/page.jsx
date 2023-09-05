@@ -1,0 +1,60 @@
+"use client";
+
+import React from "react";
+import Image from "next/image";
+import Header from "@/components/Header";
+import NoteCard from "@/components/NoteCard";
+import axiosRequest from "@/utils/axiosRequest";
+import { useUserInfoStore } from "@/store/userInfoStore";
+
+const page = () => {
+  const fetchUserInfo = useUserInfoStore((state)=> state.fetchUserInfo)
+  const userInfo = useUserInfoStore(state => state.userInfo)
+  const [notes, setNotes] = React.useState(null);
+  const [shouldUpdate, setShouldUpdate] = React.useState(false);
+
+  React.useEffect(() => {
+    fetchUserInfo()
+  }, []);
+
+  React.useEffect(() => {
+    if (!userInfo || !shouldUpdate) return;
+    axiosRequest
+      .get(`/note/${userInfo?.id}`)
+      .then((response) => {
+        setNotes(response.data);
+      })
+      .catch((error) => console.log(error))
+      .finally(() => setShouldUpdate(false));
+  }, [userInfo]);
+
+  return (
+    <div className="h-full relative">
+      <Header
+        title={`Welcome back, ${userInfo?.firstname}`}
+        icon="trash"
+        subtile="My tag"
+      />
+      {notes?.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {notes.map((note) => {
+            <NoteCard
+              key={note.id}
+              note={note}
+              setShouldUpdate={setShouldUpdate}
+            />;
+          })}
+        </div>
+      ) : (
+        <div className="absolute top-1/2 left-1/2 translate-x-[-50%] translate-y-[-50%] flex items-center justify-center w-full">
+          <Image width={80} height={80} src="/note.png" alt="Notebook Icon" />
+          <p className="text-2xl text-slate-700 font-normal">
+            Nothing to see here
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default page;
