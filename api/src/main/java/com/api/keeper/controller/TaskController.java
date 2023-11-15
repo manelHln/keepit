@@ -15,16 +15,14 @@ import java.util.List;
 public class TaskController {
     @Autowired
     private TaskService taskService;
-    @Autowired
-    private TaskRepository taskRepository;
 
     @PostMapping
     public ResponseEntity<String> createTask(@RequestBody TaskRequest request){
         return ResponseEntity.ok(taskService.addTask(request));
     }
 
-    @GetMapping
-    public ResponseEntity<List<Task>> getUserTasks(){
-        return ResponseEntity.ok(taskRepository.findAll());
+    @GetMapping("{projectId}")
+    public ResponseEntity<List<Task>> getUserTasks(@PathVariable Long projectId){
+        return ResponseEntity.ok(taskService.getProjectTask(projectId));
     }
 }

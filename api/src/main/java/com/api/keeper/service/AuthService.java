@@ -12,8 +12,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -74,5 +79,12 @@ public class AuthService {
                 .lastname(user.getLastname())
                 .id(user.getId())
                 .build();
+    }
+
+    public boolean isExpectedUser(Long id){
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User currentUser = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new UsernameNotFoundException("User does not exists"));
+        User requestingUser = userRepository.findById(id).orElseThrow(()-> new UsernameNotFoundException("User does not exists"));
+        return Objects.equals(currentUser.getId(), requestingUser.getId());
     }
 }

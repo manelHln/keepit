@@ -1,14 +1,8 @@
 package com.api.keeper.service;
 
-import com.api.keeper.domain.Label;
-import com.api.keeper.domain.Subtask;
-import com.api.keeper.domain.Task;
-import com.api.keeper.domain.User;
+import com.api.keeper.domain.*;
 import com.api.keeper.dto.TaskRequest;
-import com.api.keeper.repository.LabelRepository;
-import com.api.keeper.repository.SubtaskRepository;
-import com.api.keeper.repository.TaskRepository;
-import com.api.keeper.repository.UserRepository;
+import com.api.keeper.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,15 +21,37 @@ public class TaskService {
     private UserRepository userRepository;
     @Autowired
     private LabelRepository labelRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
+
     public String addTask(TaskRequest request) {
-        try{
-            List<Subtask> subtasks = new ArrayList<>();
-            List<Label> labels = new ArrayList<>();
-            if(!request.getSubtasks().isEmpty()){
-                subtasks = subtaskRepository.saveAll(request.getSubtasks());
+        try {
+            Project project = projectRepository.findById(request.getProjectId()).orElseThrow();
+            Set<Subtask> subtasks = new HashSet<>();
+            Set<Label> labels = new HashSet<>();
+            if (!request.getSubtasks().isEmpty()) {
+                request.getSubtasks().stream().map(e -> {
+                    Subtask subtask = Subtask.builder()
+                            .content(e.getContent())
+                            .build();
+                    Subtask created = subtaskRepository.save(subtask);
+                    subtasks.add(created);
+                    return created;
+                });
             }
-            if(!request.getLabels().isEmpty()){
-                labels = labelRepository.saveAll(request.getLabels());
+            if (!request.getLabels().isEmpty()) {
+                request.getLabels().stream().map(e -> {
+                    if (labelRepository.existsByLabel(e.getName())) {
+                        return null;
+                    }
+                    Label label = Label.builder()
+                            .label(e.getName())
+                            .build();
+                    Label created = labelRepository.save(label);
+                    labels.add(created);
+                    return created;
+                });
             }
             User user = userRepository.findById(request.getAssignedTo()).orElseThrow();
             Task task = Task.builder()
@@ -46,11 +62,17 @@ public class TaskService {
                     .assignedUser(user)
                     .subtasks((Set<Subtask>) subtasks)
                     .assignedLabels((Set<Label>) labels)
+                    .project(project)
                     .build();
             taskRepository.save(task);
             return "Task created successfully";
-        }catch (Exception e){
+        } catch (Exception e) {
             return e.getMessage();
         }
+    }
+
+    public List<Task> getProjectTask(Long projectId) {
+        Project project = projectRepository.findById(projectId).orElseThrow();
+        return taskRepository.findAllByProject(project);
     }
 }

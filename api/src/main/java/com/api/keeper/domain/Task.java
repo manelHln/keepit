@@ -19,7 +19,6 @@ import java.util.Set;
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
     @Column(name = "title")
@@ -54,6 +53,10 @@ public class Task {
 
     @OneToMany(mappedBy = "taskAssignedTo")
     private Set<Subtask> subtasks = new HashSet<>();
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "project_id", referencedColumnName = "id")
+    private Project project;
 
     @CreationTimestamp
     @Column(name = "created_at")
