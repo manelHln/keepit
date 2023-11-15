@@ -5,6 +5,7 @@ import com.api.keeper.domain.NoteStatus;
 import com.api.keeper.service.NoteService;
 import com.api.keeper.dto.NoteRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,12 @@ import java.util.List;
 public class NoteController {
     @Autowired
     private NoteService noteService;
+
+    // This is just for test purpose and is to be removed
+    @GetMapping("all")
+    public ResponseEntity<Page<Note>> getAll(){
+        return ResponseEntity.accepted().body(noteService.getAll());
+    }
 
     @GetMapping("{id}")
     public ResponseEntity<List<Note>> getAuthenticatedUserDefaultNotes(@PathVariable Long id) {

@@ -22,6 +22,7 @@ public class TaskRequest {
     private TaskPriority priority;
     private LocalDateTime dueDate;
     private Long assignedTo;
-    private Set<Subtask> subtasks = new HashSet<>();
-    private Set<Label> labels = new HashSet<>();
+    private Long projectId;
+    private Set<SubtaskRequest> subtasks = new HashSet<>();
+    private Set<LabelRequest> labels = new HashSet<>();
 }

@@ -8,6 +8,10 @@ import com.api.keeper.repository.TagRepository;
 import com.api.keeper.repository.UserRepository;
 import com.api.keeper.dto.NoteRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -81,5 +85,10 @@ public class NoteService {
     public List<Note> searchNote(String q, NoteStatus s, Long u) {
         String query = "%" + q + "%";
         return noteRepository.searchNotes(query, s, u);
+    }
+
+    public Page<Note> getAll() {
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("id").descending());
+        return noteRepository.findAll(pageable);
     }
 }
